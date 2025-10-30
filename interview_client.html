@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrialGPT AI Interview System</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        /* Interview Selection Table */
+        .interviews-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .interviews-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .interviews-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .interviews-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .candidate-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .candidate-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .candidate-avatar.female {
+            background: #e91e63;
+        }
+
+        .candidate-details h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .candidate-details .small {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Interview Interface */
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card.followup {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .question {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .question-type-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 0.75rem;
+        }
+
+        .badge-main {
+            background: #007bff;
+            color: white;
+        }
+
+        .badge-followup {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-welcome {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-complete {
+            background: #6c757d;
+            color: white;
+        }
+
+        .followup-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: #e7f3ff;
+            color: #0056b3;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 0.75rem;
+        }
+
+        .followup-indicator::before {
+            content: "↳";
+            margin-right: 0.3rem;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            transition: width 0.5s ease;
+        }
+
+        .progress-bar-fill.followup {
+            background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .transcript {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .timer {
+            margin-left: 1rem;
+            font-family: monospace;
+            font-weight: bold;
+            color: #dc3545;
+            font-size: 1.1rem;
+        }
+
+        .status {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .status-recording {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .status-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #007bff;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .no-interviews {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .interviews-table {
+                font-size: 0.9rem;
+            }
+            
+            .interviews-table th,
+            .interviews-table td {
+                padding: 0.75rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Interview Selection Page -->
+    <div id="selectionPage" class="page">
+        <div class="header">
+            <h1>🎤 TrialGPT AI Interview System</h1>
+            <p class="subtitle">Select your scheduled interview session below</p>
+        </div>
+
+        <div id="loadingInterviews" class="loading">
+            <div class="spinner"></div>
+            <p>Loading interview sessions...</p>
+        </div>
+
+        <div id="interviewsContainer" class="hidden">
+            <table class="interviews-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Role</th>
+                        <th>Meeting URL</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="interviewsTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="noInterviews" class="no-interviews hidden">
+            <h3>No Interview Sessions Found</h3>
+            <p>There are no scheduled interviews available.</p>
+            <button id="createMultipleBtn" class="btn btn-primary">
+                ➕ Create Sample Interviews
+            </button>
+        </div>
+    </div>
+
+    <!-- Interview Session Page -->
+    <div id="interviewPage" class="page hidden">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1>🎤 TrialGPT AI Interview</h1>
+                <div id="sessionInfo" class="subtitle">Initializing...</div>
+            </div>
+            <div>
+                <button id="backToSelectionBtn" class="btn btn-secondary">🔙 Back to Selection</button>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div id="questionCard" class="card">
+            <div>
+                <span id="questionTypeBadge" class="question-type-badge badge-main">Main</span>
+                <span id="questionText" class="question">Waiting for question...</span>
+                <span id="followupIndicator" class="followup-indicator hidden"></span>
+            </div>
+            <div id="questionMeta" class="small" style="color: #666; margin-bottom: 1rem;"></div>
+            
+            <!-- Progress Bars -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="mainProgressFill" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <div id="followupProgressBar" class="progress-bar hidden">
+                    <div id="followupProgressFill" class="progress-bar-fill followup" style="width: 0%"></div>
+                </div>
+                <div id="progressText" class="progress-text">Question 0 of 0</div>
+            </div>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="card">
+            <div style="margin-bottom: 1rem;">
+                <button id="startRecordingBtn" class="btn btn-primary">
+                    🎙️ Start Recording
+                </button>
+                <button id="stopRecordingBtn" class="btn btn-danger" disabled>
+                    ⏹️ Stop & Submit
+                </button>
+                <span id="recordingTimer" class="timer">0.0s</span>
+            </div>
+
+            <div>
+                <label style="font-weight: 500; color: #333;">📝 Live Transcript:</label>
+                <textarea id="transcriptArea" class="transcript" placeholder="Your speech will appear here..." readonly></textarea>
+            </div>
+
+            <div id="statusDisplay" class="status hidden"></div>
+
+            <!-- Statistics Dashboard -->
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span id="mainAnsweredStat" class="stat-value">0</span>
+                    <div class="stat-label">Main Questions</div>
+                </div>
+                <div class="stat-item">
+                    <span id="followupAnsweredStat" class="stat-value">0</span>
+                    <div class="stat-label">Follow-ups</div>
+                </div>
+                <div class="stat-item">
+                    <span id="totalTimeStat" class="stat-value">0m</span>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Recorder.js -->
+<script src="https://cdn.jsdelivr.net/gh/mattdiamond/Recorderjs@master/dist/recorder.js"></script>
+
+<script>
+    // Global state
+    let currentPage = 'selection';
+    let sessionInfo = null;
+    let currentQuestion = null;
+    let currentIqId = null;
+    let isRecording = false;
+    let transcript = '';
+    let interimTranscript = '';
+    let isFollowupMode = false;
+    let currentMainQuestion = 0;
+    let totalMainQuestions = 5;
+    let currentFollowup = 0;
+    let totalFollowups = 0;
+    let lastMainIqId = null; 
+    let stats = {
+        mainAnswered: 0,
+        followupAnswered: 0,
+        totalAnswers: 0,
+        startTime: null
+    };
+
+    // WebSocket and media objects
+    let ws = null;
+    let recognition = null;
+    let startTs = 0;
+    let tick = null;
+    let silenceTimeout = null;
+
+    // Recorder.js objects
+    let recorder, gumStream, audioContext, input;
+
+    // DOM element references
+    const elements = {
+        // Pages
+        selectionPage: document.getElementById('selectionPage'),
+        interviewPage: document.getElementById('interviewPage'),
+        
+        // Selection page
+        loadingInterviews: document.getElementById('loadingInterviews'),
+        interviewsContainer: document.getElementById('interviewsContainer'),
+        interviewsTableBody: document.getElementById('interviewsTableBody'),
+        noInterviews: document.getElementById('noInterviews'),
+        createMultipleBtn: document.getElementById('createMultipleBtn'),
+        
+        // Interview page
+        sessionInfo: document.getElementById('sessionInfo'),
+        backToSelectionBtn: document.getElementById('backToSelectionBtn'),
+        questionCard: document.getElementById('questionCard'),
+        questionTypeBadge: document.getElementById('questionTypeBadge'),
+        questionText: document.getElementById('questionText'),
+        followupIndicator: document.getElementById('followupIndicator'),
+        questionMeta: document.getElementById('questionMeta'),
+        mainProgressFill: document.getElementById('mainProgressFill'),
+        followupProgressBar: document.getElementById('followupProgressBar'),
+        followupProgressFill: document.getElementById('followupProgressFill'),
+        progressText: document.getElementById('progressText'),
+        
+        // Recording controls
+        startRecordingBtn: document.getElementById('startRecordingBtn'),
+        stopRecordingBtn: document.getElementById('stopRecordingBtn'),
+        recordingTimer: document.getElementById('recordingTimer'),
+        transcriptArea: document.getElementById('transcriptArea'),
+        statusDisplay: document.getElementById('statusDisplay'),
+        
+        // Statistics
+        mainAnsweredStat: document.getElementById('mainAnsweredStat'),
+        followupAnsweredStat: document.getElementById('followupAnsweredStat'),
+        totalTimeStat: document.getElementById('totalTimeStat')
+    };
+
+    // Utility functions
+    function showPage(pageName) {
+        elements.selectionPage.classList.toggle('hidden', pageName !== 'selection');
+        elements.interviewPage.classList.toggle('hidden', pageName !== 'interview');
+        currentPage = pageName;
+    }
+
+    function updateStatus(message, type = '') {
+        if (message) {
+            elements.statusDisplay.textContent = message;
+            elements.statusDisplay.className = `status ${type ? `status-${type}` : ''}`;
+            elements.statusDisplay.classList.remove('hidden');
+        } else {
+            elements.statusDisplay.classList.add('hidden');
+        }
+    }
+
+    function updateStats() {
+        elements.mainAnsweredStat.textContent = stats.mainAnswered;
+        elements.followupAnsweredStat.textContent = stats.followupAnswered;
+        
+        if (stats.startTime) {
+            const totalMinutes = Math.floor((Date.now() - stats.startTime) / 60000);
+            elements.totalTimeStat.textContent = `${totalMinutes}m`;
+        }
+    }
+
+    function updateProgress() {
+        try {
+            // Main question progress
+            const mainProgress = totalMainQuestions > 0 ? (stats.mainAnswered / totalMainQuestions) * 100 : 0;
+            elements.mainProgressFill.style.width = `${Math.min(mainProgress, 100)}%`;
+            
+            // Follow-up progress
+            if (isFollowupMode && totalFollowups > 0) {
+                elements.followupProgressBar.classList.remove('hidden');
+                const followupProgress = (currentFollowup / totalFollowups) * 100;
+                elements.followupProgressFill.style.width = `${followupProgress}%`;
+                elements.progressText.textContent = `Follow-up ${currentFollowup} of ${totalFollowups}`;
+            } else {
+                elements.followupProgressBar.classList.add('hidden');
+                elements.progressText.textContent = `Question ${currentMainQuestion} of ${totalMainQuestions}`;
+            }
+        } catch (error) {
+            console.error('Error updating progress:', error);
+        }
+    }
+
+    // Text-to-Speech with Indian English
+    function speakText(text, candidateGender = 'M') {
+        if (!('speechSynthesis' in window)) {
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-IN';
+        utterance.rate = 0.9;
+        utterance.pitch = candidateGender === 'F' ? 0.8 : 1.2;
+        utterance.volume = 0.8;
+
+        // Try to select an Indian English voice
+        const voices = window.speechSynthesis.getVoices();
+        let selectedVoice = null;
+        if (voices.length > 0) {
+            const indianVoices = voices.filter(voice => {
+                return voice.lang === 'en-IN';
+            });
+            if (indianVoices.length > 0) {
+                selectedVoice = indianVoices[0];
+            } else {
+                selectedVoice = voices[0];
+            }
+        }
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Speech Recognition initialization
+    function initSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            console.log("Speech recognition not supported");
+            return false;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN';
+
+        recognition.onresult = function(event) {
+            let interim = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                const res = event.results[i];
+                const best = (res && res[0] && res[0].transcript) ? res[0].transcript : '';
+                if (res.isFinal) {
+                    transcript += best + ' ';
+                } else {
+                    interim += best;
+                }
+            }
+
+            interimTranscript = interim;
+            elements.transcriptArea.value = (transcript || '') + (interimTranscript || '');
+            elements.transcriptArea.scrollTop = elements.transcriptArea.scrollHeight;
+
+            // Auto-stop after silence
+            clearTimeout(silenceTimeout);
+            silenceTimeout = setTimeout(() => {
+                stopRecording();
+            }, 2500);
+        };
+
+        recognition.onerror = function(event) {
+            console.log(`Speech recognition error: ${event.error}`);
+        };
+
+        recognition.onend = function() {
+            if (isRecording) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.warn('Recognition restart failed:', e);
+                }
+            }
+        };
+
+        return true;
+    }
+
+    // Load and display interview sessions
+    async function loadInterviewSessions() {
+        try {
+            const response = await fetch('/api/interviews/list');
+            const data = await response.json();
+
+            elements.loadingInterviews.classList.add('hidden');
+
+            if (!data.interviews || data.interviews.length === 0) {
+                elements.noInterviews.classList.remove('hidden');
+                return;
+            }
+
+            elements.interviewsContainer.classList.remove('hidden');
+            elements.interviewsTableBody.innerHTML = '';
+
+            data.interviews.forEach(interview => {
+                const row = document.createElement('tr');
+                
+                const genderClass = interview.candidate_gender === 'F' ? 'female' : '';
+                const initials = interview.candidate_name.split(' ').map(n => n[0]).join('');
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="candidate-info">
+                            <div class="candidate-avatar ${genderClass}">${initials}</div>
+                            <div class="candidate-details">
+                                <h4>${interview.candidate_name}</h4>
+                                <div class="small">ID: ${interview.candidate_id} • ${interview.candidate_gender === 'F' ? 'Female' : 'Male'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><strong>${interview.role}</strong></td>
+                    <td>
+                        <code style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                            ${interview.meeting_url}
+                        </code>
+                    </td>
+                    <td>
+                        <span style="background: ${interview.status === 'completed' ? '#28a745' : '#007bff'}; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; text-transform: capitalize;">
+                            ${interview.status}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-success start-interview-btn" 
+                                data-token="${interview.meeting_url.split('/').pop()}"
+                                data-name="${interview.candidate_name}"
+                                data-gender="${interview.candidate_gender}">
+                            🎯 Start Interview
+                        </button>
+                    </td>
+                `;
+                
+                elements.interviewsTableBody.appendChild(row);
+            });
+
+            // Add event listeners to start interview buttons
+            document.querySelectorAll('.start-interview-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const token = e.target.dataset.token;
+                    const name = e.target.dataset.name;
+                    const gender = e.target.dataset.gender;
+                    startInterview(token, name, gender);
+                });
+            });
+
+        } catch (error) {
+            console.error('Error loading interviews:', error);
+            elements.loadingInterviews.innerHTML = '<p style="color: #dc3545;">Failed to load interviews.</p>';
+        }
+    }
+
+    // Create multiple sample interviews
+    async function createMultipleInterviews() {
+        elements.createMultipleBtn.disabled = true;
+        elements.createMultipleBtn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px; margin-right: 0.5rem;"></div>Creating...';
+
+        try {
+            const response = await fetch('/api/admin/create_multiple_interviews');
+            const data = await response.json();
+
+            if (response.ok) {
+                await loadInterviewSessions();
+            } else {
+                alert('Failed to create test interviews');
+            }
+        } catch (error) {
+            console.error('Error creating interviews:', error);
+            alert('Error creating test interviews');
+        } finally {
+            elements.createMultipleBtn.disabled = false;
+            elements.createMultipleBtn.innerHTML = '➕ Create Sample Interviews';
+        }
+    }
+
+    // WebSocket management
+    function connectWebSocket(meetingToken) {
+        const wsUrl = `ws://localhost:8000/ws/interview?meeting_token=${meetingToken}`;
+        
+        if (ws) {
+            ws.close();
+            ws = null;
+        }
+        
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+            console.log("Connected to interview session");
+            updateStatus("🔗 Connected to interview session", "success");
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                handleWebSocketMessage(msg);
+            } catch (e) {
+                console.error("Failed to parse WebSocket message:", e, "Raw data:", event.data);
+                updateStatus("❌ Error: Invalid message from server", "error");
+            }
+        };
+
+        ws.onclose = (event) => {
+            console.log("WebSocket connection closed", event.code, event.reason);
+            if (event.code !== 1000) {
+                updateStatus("⚠️ Connection lost. Please refresh the page.", "error");
+            }
+        };
+
+        ws.onerror = (e) => {
+            console.error("WebSocket connection error", e);
+            updateStatus("❌ Connection error. Check your network.", "error");
+        };
+    }
+
+    // WebSocket message handler
+    function handleWebSocketMessage(msg) {
+        console.log('WebSocket message received:', msg);
+
+        try {
+            if (!msg || typeof msg !== 'object' || !msg.type) {
+                console.error('Invalid message structure:', msg);
+                return;
+            }
+
+            if (msg.type === "greeting") {
+                currentQuestion = {
+                    text: msg.text,
+                    type: "greeting",
+                    meta: "Welcome Message",
+                    iq_id: null
+                };
+                
+                elements.questionText.textContent = msg.text;
+                elements.questionMeta.textContent = "Welcome Message";
+                elements.questionTypeBadge.textContent = "Welcome";
+                elements.questionTypeBadge.className = "question-type-badge badge-welcome";
+                elements.followupIndicator.classList.add('hidden');
+                elements.questionCard.className = "card";
+                
+                isFollowupMode = false;
+                speakText(msg.text, sessionInfo?.candidate_gender || 'M');
+                updateProgress();
+                
+                if (!stats.startTime) {
+                    stats.startTime = Date.now();
+                }
+
+            } else if (msg.type === "question") {
+                if (!msg.iq_id || !msg.text) {
+                    console.error('Invalid main question message - missing required fields:', msg);
+                    updateStatus("❌ Error: Invalid question received", "error");
+                    return;
+                }
+
+                currentIqId = msg.iq_id;
+                console.log(`MAIN QUESTION: Set currentIqId = ${currentIqId}`);
+                
+                currentQuestion = {
+                    text: msg.text,
+                    type: "main",
+                    meta: `Main Question ${msg.seq || 'N/A'}`,
+                    iq_id: msg.iq_id,
+                    seq: msg.seq,
+                    question_type: msg.question_type || "main"
+                };
+                
+                elements.questionText.textContent = msg.text;
+                elements.questionMeta.textContent = `Main Question ${msg.seq || 'N/A'}`;
+                elements.questionTypeBadge.textContent = "Main";
+                elements.questionTypeBadge.className = "question-type-badge badge-main";
+                elements.followupIndicator.classList.add('hidden');
+                elements.questionCard.className = "card";
+                
+                lastMainIqId = msg.iq_id;
+                currentMainQuestion = parseInt(msg.seq);
+                totalMainQuestions = msg.total_questions;
+                isFollowupMode = false;
+                speakText(msg.text, sessionInfo?.candidate_gender || 'M');
+                updateProgress();
+                
+                transcript = '';
+                interimTranscript = '';
+                elements.transcriptArea.value = '';
+                elements.startRecordingBtn.disabled = false;
+
+            } else if (msg.type === "followup_question") {
+                if (!msg.iq_id || !msg.text || msg.followup_number === undefined || msg.total_followups === undefined) {
+                    console.error('Invalid followup question message - missing required fields:', msg);
+                    updateStatus("❌ Error: Invalid follow-up question received", "error");
+                    return;
+                }
+
+                currentIqId = msg.iq_id;
+                console.log(`FOLLOWUP QUESTION: Set currentIqId = ${currentIqId}`);
+                
+                currentQuestion = {
+                    text: msg.text,
+                    iq_id: msg.iq_id,
+                    type: "followup",
+                    question_type: msg.question_type || "followup",
+                    meta: `Follow-up Question ${msg.followup_number} of ${msg.total_followups}`,
+                    seq: msg.seq,
+                    followup_number: msg.followup_number,
+                    total_followups: msg.total_followups
+                };
+                
+                elements.questionText.textContent = msg.text;
+                elements.questionMeta.textContent = `Follow-up Question ${msg.followup_number} of ${msg.total_followups}`;
+                elements.questionTypeBadge.textContent = "Follow-up";
+                elements.questionTypeBadge.className = "question-type-badge badge-followup";
+                elements.followupIndicator.textContent = `${msg.followup_number}/${msg.total_followups}`;
+                elements.followupIndicator.classList.remove('hidden');
+                elements.questionCard.className = "card followup";
+                
+                currentFollowup = msg.followup_number;
+                totalFollowups = msg.total_followups;
+                isFollowupMode = true;
+                speakText(msg.text, sessionInfo?.candidate_gender || 'M');
+                updateProgress();
+                
+                transcript = '';
+                interimTranscript = '';
+                elements.transcriptArea.value = '';
+                elements.startRecordingBtn.disabled = false;
+
+            } else if (msg.type === "answer_logged") {
+                if (!msg.iq_id) {
+                    console.error('Invalid answer_logged message - missing iq_id:', msg);
+                    return;
+                }
+
+                const isFollowupAnswer = msg.question_type === "followup";
+                
+                if (isFollowupAnswer) {
+                    stats.followupAnswered++;
+                } else {
+                    stats.mainAnswered++;
+                }
+                
+                stats.totalAnswers++;
+                updateStats();
+                updateStatus("✅ Answer submitted successfully!", "success");
+
+            } else if (msg.type === "done") {
+                const completionText = `🎉 Thank you ${sessionInfo?.candidate_name || 'candidate'} for your time! Your interview is complete.`;
+                
+                elements.questionText.textContent = completionText;
+                elements.questionMeta.textContent = "Interview Complete";
+                elements.questionTypeBadge.textContent = "Complete";
+                elements.questionTypeBadge.className = "question-type-badge badge-complete";
+                elements.followupIndicator.classList.add('hidden');
+                elements.questionCard.className = "card";
+                
+                updateStatus("🎉 Interview completed successfully!", "success");
+                
+                elements.mainProgressFill.style.width = "100%";
+                elements.followupProgressBar.classList.add('hidden');
+                elements.progressText.textContent = "Interview Complete";
+                
+                speakText(completionText, sessionInfo?.candidate_gender || 'M');
+                elements.startRecordingBtn.disabled = true;
+                elements.stopRecordingBtn.disabled = true;
+
+            } else if (msg.type === "error") {
+                console.error('Server error message:', msg);
+                updateStatus(`❌ Server Error: ${msg.message || 'Unknown error'}`, "error");
+
+            } else {
+                console.warn('Unknown message type received:', msg.type, msg);
+            }
+
+        } catch (error) {
+            console.error('Error handling WebSocket message:', error, 'Message:', msg);
+            updateStatus("❌ Error processing server message", "error");
+        }
+    }
+
+    // Recording functions using Recorder.js
+    async function startRecording() {
+        if (!currentIqId) {
+            console.error("ERROR: No currentIqId available for recording!");
+            updateStatus("❌ Error: No question ID. Please wait for the next question.", "error");
+            return;
+        }
+        
+        if (!sessionInfo?.schedule_id) {
+            console.error("ERROR: No session info available!");
+            updateStatus("❌ Error: Session not initialized. Please try refreshing.", "error");
+            return;
+        }
+        
+        console.log(`Starting recording with currentIqId: ${currentIqId}, question type: ${currentQuestion?.type || 'unknown'}`);
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            updateStatus("❌ Microphone not available in this browser", "error");
+            return;
+        }
+
+        // 3-second countdown
+        elements.startRecordingBtn.disabled = true;
+        elements.stopRecordingBtn.disabled = true;
+        let countdown = 3;
+        elements.recordingTimer.textContent = `Recording starts in ${countdown}`;
+        
+        const countInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                elements.recordingTimer.textContent = `Recording starts in ${countdown}`;
+            } else {
+                clearInterval(countInterval);
+                elements.recordingTimer.textContent = 'Starting...';
+                startActualRecording();
+            }
+        }, 1000);
+    }
+
+    async function startActualRecording() {
+        try {
+            gumStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            input = audioContext.createMediaStreamSource(gumStream);
+            recorder = new Recorder(input, { numChannels: 1 });
+            recorder.record();
+
+            // Start speech recognition
+            if (recognition) {
+                transcript = '';
+                interimTranscript = '';
+                recognition.start();
+            }
+
+            // Start recording timer
+            startTs = performance.now();
+            tick = setInterval(() => {
+                const s = ((performance.now() - startTs) / 1000).toFixed(1);
+                elements.recordingTimer.textContent = `${s}s`;
+            }, 100);
+
+            isRecording = true;
+            elements.startRecordingBtn.disabled = true;
+            elements.stopRecordingBtn.disabled = false;
+            updateStatus("🎙️ Recording... Please speak your answer", "recording");
+
+        } catch (e) {
+            updateStatus("❌ Failed to access microphone", "error");
+            console.error(e);
+            elements.startRecordingBtn.disabled = false;
+        }
+    }
+
+    function stopRecording() {
+        isRecording = false;
+
+        if (recognition) {
+            recognition.stop();
+        }
+
+        if (tick) {
+            clearInterval(tick);
+            tick = null;
+        }
+
+        if (recorder) {
+            recorder.stop();
+            recorder.exportWAV(function(blob) {
+                if (gumStream) {
+                    gumStream.getTracks().forEach(track => track.stop());
+                    gumStream = null;
+                }
+                recorder.clear();
+                handleRecordingStop(blob);
+            });
+        }
+
+        elements.startRecordingBtn.disabled = false;
+        elements.stopRecordingBtn.disabled = true;
+        updateStatus("⏳ Processing your answer...", "processing");
+    }
+
+    async function handleRecordingStop(blob) {
+        if (!currentIqId) {
+            console.error("ERROR: No currentIqId available for upload!");
+            updateStatus("❌ Error: Missing question ID. Cannot submit answer.", "error");
+            return;
+        }
+        
+        if (!sessionInfo?.schedule_id) {
+            console.error("ERROR: No session info available!");
+            updateStatus("❌ Error: Missing session information. Cannot submit answer.", "error");
+            return;
+        }
+
+        const file = new File([blob], "answer.wav", { type: 'audio/wav' });
+        const finalTranscriptText = transcript.trim() || "No speech detected";
+        
+        console.log("[DEBUG] Uploading answer with:", {
+            session: sessionInfo.schedule_id,
+            iq_id: currentIqId,
+            question_type: currentQuestion?.question_type || currentQuestion?.type || 'unknown',
+            transcript: finalTranscriptText.substring(0, 50) + "...",
+            currentQuestion: currentQuestion
+        });
+
+        const formData = new FormData();
+        formData.append("session", sessionInfo.schedule_id);
+        formData.append("iq_id", String(currentIqId));
+        formData.append("elapsed_ms", String((performance.now() - startTs) || 0));
+        formData.append("transcript", finalTranscriptText);
+        formData.append("file", file);
+
+        updateStatus("📤 Uploading your answer...", "processing");
+
+        try {
+            const response = await fetch('/api/upload_answer', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Upload failed:", response.status, errorText);
+                updateStatus(`❌ Upload failed: ${response.status} - ${errorText}`, "error");
+                return;
+            }
+
+            const result = await response.json();
+            console.log("Upload successful:", result);
+            updateStatus("✅ Answer uploaded successfully! Waiting for next question...", "success");
+
+        } catch (e) {
+            updateStatus("❌ Network error during upload. Please check your connection.", "error");
+            console.error("Network error:", e);
+        }
+    }
+
+    // Interview session functions
+    async function startInterview(meetingToken, candidateName, candidateGender) {
+        showPage('interview');
+
+        try {
+            const response = await fetch(`/api/session/${meetingToken}`);
+            if (!response.ok) {
+                throw new Error('Session not found');
+            }
+
+            sessionInfo = await response.json();
+            elements.sessionInfo.textContent = `Welcome ${sessionInfo.candidate_name || 'Candidate'} — Role: ${sessionInfo.role || '(unknown)'}`;
+
+            const speechSupported = initSpeechRecognition();
+            if (!speechSupported) {
+                updateStatus("⚠️ Speech recognition not supported", "error");
+            }
+
+            connectWebSocket(meetingToken);
+
+        } catch (error) {
+            console.error('Interview initialization error:', error);
+            updateStatus(`❌ ${error.message}`, "error");
+        }
+    }
+
+    // Event listeners setup
+    function setupEventListeners() {
+        elements.createMultipleBtn.addEventListener('click', createMultipleInterviews);
+        
+        elements.backToSelectionBtn.addEventListener('click', () => {
+            try {
+                showPage('selection');
+                
+                if (ws) {
+                    ws.close();
+                    ws = null;
+                }
+                if (gumStream) {
+                    gumStream.getTracks().forEach(track => track.stop());
+                    gumStream = null;
+                }
+                if (recognition) {
+                    recognition.stop();
+                    recognition = null;
+                }
+                if (tick) {
+                    clearInterval(tick);
+                    tick = null;
+                }
+                if (silenceTimeout) {
+                    clearTimeout(silenceTimeout);
+                    silenceTimeout = null;
+                }
+                
+                currentIqId = null;
+                currentQuestion = null;
+                isFollowupMode = false;
+                isRecording = false;
+                transcript = '';
+                interimTranscript = '';
+                
+                console.log('Cleaned up interview session');
+                
+            } catch (error) {
+                console.error('Error during cleanup:', error);
+            }
+        });
+
+        elements.startRecordingBtn.addEventListener('click', startRecording);
+        elements.stopRecordingBtn.addEventListener('click', stopRecording);
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', () => {
+        setupEventListeners();
+        loadInterviewSessions();
+    });
+</script>
+
+</body>
+</html>
